@@ -13,13 +13,13 @@ except:
 
 from pprint import pprint  # noqa: F401
 
-from biokbase.workspace.client import Workspace as workspaceService
+from installed_clients.WorkspaceClient import Workspace as workspaceService
 from kb_Bowtie2.kb_Bowtie2Impl import kb_Bowtie2
 from kb_Bowtie2.kb_Bowtie2Server import MethodContext
 from kb_Bowtie2.authclient import KBaseAuth as _KBaseAuth
 
-from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
-from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
+from installed_clients.AssemblyUtilClient import AssemblyUtil
+from installed_clients.GenomeFileUtilClient import GenomeFileUtil
 
 
 class kb_Bowtie2IndexerTest(unittest.TestCase):

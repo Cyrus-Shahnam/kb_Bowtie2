@@ -9,15 +9,15 @@ import re
 from kb_Bowtie2.util.Bowtie2Runner import Bowtie2Runner
 from kb_Bowtie2.util.Bowtie2IndexBuilder import Bowtie2IndexBuilder
 
-from ReadsUtils.ReadsUtilsClient import ReadsUtils
-from ReadsAlignmentUtils.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
-from kb_QualiMap.kb_QualiMapClient import kb_QualiMap
-from KBaseReport.KBaseReportClient import KBaseReport
+from installed_clients.ReadsUtilsClient import ReadsUtils
+from installed_clients.ReadsAlignmentUtilsClient import ReadsAlignmentUtils
+from installed_clients.kb_QualiMapClient import kb_QualiMap
+from installed_clients.KBaseReportClient import KBaseReport
 
-from Workspace.WorkspaceClient import Workspace
-from SetAPI.SetAPIServiceClient import SetAPI
+from installed_clients.WorkspaceClient import Workspace
+from installed_clients.SetAPIServiceClient import SetAPI
 
-from KBParallel.KBParallelClient import KBParallel
+from installed_clients.KBParallelClient import KBParallel
 
 
 class Bowtie2Aligner(object):
