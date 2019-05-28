@@ -1,3 +1,6 @@
+### Version 0.4.3
+- Fixes for BadStatusLine and update to Python 3.
+
 ### Version 0.4.2
 - updated citation to PLOS format
 

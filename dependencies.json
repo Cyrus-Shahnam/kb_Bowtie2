@@ -24,7 +24,8 @@
   "version_tag" : "release"
 }, {
   "module_name" : "KBParallel",
-  "type" : "core",
+  "type" : "sdk",
+  "version_tag" : "release",
   "file_path" : "https://raw.githubusercontent.com/kbaseapps/KBParallel/master/KBParallel.spec"
 }, {
   "module_name" : "ReadsAlignmentUtils",
