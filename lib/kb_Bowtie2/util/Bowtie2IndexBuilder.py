@@ -6,10 +6,10 @@ import traceback
 
 from kb_Bowtie2.util.Bowtie2Runner import Bowtie2Runner
 
-from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
-from Workspace.WorkspaceClient import Workspace
-from GenomeAnnotationAPI.GenomeAnnotationAPIServiceClient import GenomeAnnotationAPI
-from DataFileUtil.DataFileUtilClient import DataFileUtil
+from installed_clients.AssemblyUtilClient import AssemblyUtil
+from installed_clients.WorkspaceClient import Workspace
+from installed_clients.GenomeAnnotationAPIServiceClient import GenomeAnnotationAPI
+from installed_clients.DataFileUtilClient import DataFileUtil
 
 
 class Bowtie2IndexBuilder(object):

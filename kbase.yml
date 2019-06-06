@@ -2,7 +2,7 @@ module-name:
     kb_Bowtie2
 
 module-description:
-    A KBase module
+    Module to wrap Bowtie2
 
 service-language:
     python

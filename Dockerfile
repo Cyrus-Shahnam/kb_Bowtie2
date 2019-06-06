@@ -1,4 +1,4 @@
-FROM kbase/kbase:sdkbase2.latest
+FROM kbase/sdkbase2:python
 MAINTAINER KBase Developer
 # -----------------------------------------
 
@@ -7,7 +7,7 @@ MAINTAINER KBase Developer
 # Here we install a python coverage tool and an
 # https library that is out of date in the base image.
 
-RUN pip install coverage
+RUN pip install coverage && apt-get -y update && apt-get -y install wget g++ zlib1g-dev
 
 WORKDIR /kb/module
 

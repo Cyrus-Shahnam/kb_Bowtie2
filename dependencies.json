@@ -25,7 +25,8 @@
 }, {
   "module_name" : "KBParallel",
   "type" : "sdk",
-  "version_tag" : "release"
+  "version_tag" : "release",
+  "file_path" : "https://raw.githubusercontent.com/kbaseapps/KBParallel/master/KBParallel.spec"
 }, {
   "module_name" : "ReadsAlignmentUtils",
   "type" : "sdk",
@@ -41,5 +42,5 @@
 }, {
   "module_name" : "Workspace",
   "type" : "core",
-  "file_path" : "https://raw.githubusercontent.com/kbase/workspace_deluxe/master/workspace.spec"
+  "file_path" : "https://raw.githubusercontent.com/kbase/workspace_deluxe/develop/workspace.spec"
 } ]
