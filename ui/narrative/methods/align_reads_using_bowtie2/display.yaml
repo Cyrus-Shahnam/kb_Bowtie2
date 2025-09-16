@@ -1,12 +1,12 @@
 #
 # Define basic display information
 #
-name     : Align Reads using Bowtie2 - v2.3.2
+name     : Align Reads using Bowtie2 - v2.5.4
 tooltip  : |
     Align sequencing reads to long reference prokaryotic genome sequences using Bowtie2.
 
 screenshots :
-    []
+  []
 
 icon: bowtie-cyan.png
 
@@ -14,102 +14,112 @@ icon: bowtie-cyan.png
 # Define the set of other narrative methods that should be suggested to the user.
 #
 method-suggestions :
-    related :
-        []
-    next :
-        [assemble_transcripts_using_cufflinks,assemble_transcripts_using_stringtie]
-
+  related : []
+  next :
+    [assemble_transcripts_using_cufflinks, assemble_transcripts_using_stringtie]
 
 #
 # Configure the display and description of the parameters
 #
 parameters :
-    input_ref :
-        ui-name : |
-            RNA-seq SampleSet or Read Library
-        short-hint : |
-            Select the RNA-seq SampleSet or ReadsSet object. If you have only one sample of RNA-seq reads, select the corresponding library object.
-    assembly_or_genome_ref :
-        ui-name : |
-            Assembly or Genome
-        short-hint : |
-            Select the reference Assembly or Genome for the read alignment.
-    output_obj_name_suffix :
-        ui-name : |
-            Output Alignment Set Name Suffix
-        short-hint : |
-            Provide the suffix to use for the output reads alignment set name.
-    alignment_type :
-        ui-name : |
-            Alignment Type
-        short-hint : |
-            Select the alignment type. By default, Bowtie2 performs end-to-end read alignment. It searches for alignments involving all of read characters. For the local option, it can clip some read characters from one or both ends of the alignment to maximize the alignment score.
-    quality_score :
-        ui-name : |
-            Alignment Quality Score Type
-        short-hint : |
-            Select the quality score type depending on the sequencing platform. The default is phred33, which is used by Illumina starting with v1.8.
-    preset_options :
-        ui-name : |
-            Alignment Type Preset Options
-        short-hint : |
-            Select the preset options based on alignment type. Faster takes less time because it is less sensitive.
-    trim5 :
-        ui-name : |
-            Trim Bases From 5'end
-        short-hint : |
-            Trim the base pairs from the 5' end of each read before alignment, if needed (default is 0).
-    trim3 :
-        ui-name : |
-            Trim Bases From 3'end
-        short-hint : |
-            Trim the base pairs from the 3' end of each read before alignment, if needed (default is 0).
-    np :
-        ui-name : |
-            Penalty
-        short-hint : |
-            Sets the penalty for positions where the read, reference, or both, contain an ambiguous character such as N (default is 1).
-    minins :
-        ui-name : |
-            Minimum Fragment Length For Paired-End Alignments
-        short-hint : |
-            Select the minimum fragment length for valid untrimmed paired-end alignments (default is 0).
-    maxins :
-        ui-name : |
-            Maximum Fragment Length For Paired-End Alignments
-        short-hint : |
-            Select the maximum fragment length for valid untrimmed paired-end alignments (default is 500).
-    orientation :
-        ui-name : |
-            Orientation
-        short-hint : |
-            Select the upstream/downstream mate orientations for valid paired-end alignments against the forward reference strand (default is FR).
-    condition_label:
-        ui-name : |
-            Condition Label for Single Library Run (optional)
-        short-hint : |
-            If you run this App on a single Reads Library and want to specify a condition label in the alignment, set this paramter.
-    output_alignment_suffix :
-        ui-name : Alignment output name suffix
-        short-hint : Individual alignments will be given names based on the reads object name appended with this extension.
+  input_ref :
+    ui-name : |
+      RNA-seq SampleSet or Read Library
+    short-hint : |
+      Select the RNA-seq SampleSet or ReadsSet object. If you have only one sample of RNA-seq reads, select the corresponding library object.
+  assembly_or_genome_ref :
+    ui-name : |
+      Assembly or Genome
+    short-hint : |
+      Select the reference Assembly or Genome for the read alignment.
+  output_obj_name_suffix :
+    ui-name : |
+      Output Alignment Set Name Suffix
+    short-hint : |
+      Provide the suffix to use for the output reads alignment set name.
+  alignment_type :
+    ui-name : |
+      Alignment Type
+    short-hint : |
+      Select the alignment type. By default, Bowtie2 performs end-to-end read alignment. It searches for alignments involving all of read characters. For the local option, it can clip some read characters from one or both ends of the alignment to maximize the alignment score.
+  quality_score :
+    ui-name : |
+      Alignment Quality Score Type
+    short-hint : |
+      Select the quality score type depending on the sequencing platform. The default is phred33, which is used by Illumina starting with v1.8.
+  preset_options :
+    ui-name : |
+      Alignment Type Preset Options
+    short-hint : |
+      Select the preset options based on alignment type. Faster takes less time because it is less sensitive.
+  trim5 :
+    ui-name : |
+      Trim Bases From 5'end
+    short-hint : |
+      Trim the base pairs from the 5' end of each read before alignment, if needed (default is 0).
+  trim3 :
+    ui-name : |
+      Trim Bases From 3'end
+    short-hint : |
+      Trim the base pairs from the 3' end of each read before alignment, if needed (default is 0).
+  np :
+    ui-name : |
+      Penalty
+    short-hint : |
+      Sets the penalty for positions where the read, reference, or both, contain an ambiguous character such as N (default is 1).
+  minins :
+    ui-name : |
+      Minimum Fragment Length For Paired-End Alignments
+    short-hint : |
+      Select the minimum fragment length for valid untrimmed paired-end alignments (default is 0).
+  maxins :
+    ui-name : |
+      Maximum Fragment Length For Paired-End Alignments
+    short-hint : |
+      Select the maximum fragment length for valid untrimmed paired-end alignments (default is 500).
+  orientation :
+    ui-name : |
+      Orientation
+    short-hint : |
+      Select the upstream/downstream mate orientations for valid paired-end alignments against the forward reference strand (default is FR).
+  condition_label:
+    ui-name : |
+      Condition Label for Single Library Run (optional)
+    short-hint : |
+      If you run this App on a single Reads Library and want to specify a condition label in the alignment, set this paramter.
+  output_alignment_suffix :
+    ui-name : Alignment output name suffix
+    short-hint : Individual alignments will be given names based on the reads object name appended with this extension.
+
+  # -------- NEW (Bowtie2 ≥2.5) --------
+  sam_opt_config :
+    ui-name : |
+      SAM OPT tag config (advanced)
+    short-hint : |
+      Pass-through for Bowtie2's --sam-opt-config. Leave empty to use defaults; set to a config name or path to control SAM optional tag/flag emission.
+  use_sais :
+    ui-name : |
+      Use SAIS indexing (advanced)
+    short-hint : |
+      When building indexes inside the app, enable bowtie2-build --sais. Faster index builds for small references; may use more RAM. Leave unchecked for default.
 
 description : |
-    <p>This App aligns the sequencing reads for a set of two or more samples to relatively long reference sequences, usually genomes, using Bowtie2 and outputs a set of alignments in BAM format. Alternatively, if the user has only a single sample of reads or a set of reads, this App will take single-end or paired-end library object instead of a sample set.</p>
+  <p>This App aligns the sequencing reads for a set of two or more samples to relatively long reference sequences, usually genomes, using Bowtie2 and outputs a set of alignments in BAM format. Alternatively, if the user has only a single sample of reads or a set of reads, this App will take single-end or paired-end library object instead of a sample set.</p>
 
-    <p>In addition, this App outputs the alignment statistics such as total reads, total reads mapped and unmapped, number of singletons, multiple alignments, and overall successful alignment rate in the table format.</p>
+  <p>In addition, this App outputs the alignment statistics such as total reads, total reads mapped and unmapped, number of singletons, multiple alignments, and overall successful alignment rate in the table format.</p>
 
-    <p>Bowtie2 supports end-to-end read alignment mode by default. In this mode, it searches for alignments involving all of the read characters. This is also called an "untrimmed" or "unclipped" alignment. The App also supports "local" alignment mode, which produces alignments that might be "trimmed" (or "soft clipped") at one or both extremes in a way that optimizes the alignment score.</p>
+  <p>Bowtie2 supports end-to-end read alignment mode by default. In this mode, it searches for alignments involving all of the read characters. This is also called an "untrimmed" or "unclipped" alignment. The App also supports "local" alignment mode, which produces alignments that might be "trimmed" (or "soft clipped") at one or both extremes in a way that optimizes the alignment score.</p>
 
-    <p><strong>NOTE:</strong> This App is one of the steps in the <a href= "http://kbase.us/expression-analysis/">Transcriptomics and Expression Analysis workflow </a> in KBase, however it can also be run as a standalone for one or more RNA-seq samples.</p>
+  <p><strong>New in v2.5.4:</strong> advanced controls for SAM OPT tag configuration and an option to use SAIS indexing when building reference indexes.</p>
 
-    <p><strong>Team members who developed & deployed algorithm in KBase:</strong> Srividya Ramakrishnan, Sunita Kumari, Shinjae Yoo, Priya Ranjan, Jim Thomason, and Vivek Kumar. For questions, please <a href=”http://kbase.us/contact-us/”>contact us</a>.</p>
+  <p><strong>NOTE:</strong> This App is one of the steps in the <a href="http://kbase.us/expression-analysis/">Transcriptomics and Expression Analysis workflow</a> in KBase, however it can also be run as a standalone for one or more RNA-seq samples.</p>
 
 publications :
-    -
-        display-text: |
-            Langmead B, Salzberg SL. Fast gapped-read alignment with Bowtie 2. Nat Methods. 2012;9: 357–359. doi:10.1038/nmeth.1923
-        link: https://www.nature.com/articles/nmeth.1923
-    -
-        display-text: |
-            Langmead B, Trapnell C, Pop M, Salzberg SL. Ultrafast and memory-efficient alignment of short DNA sequences to the human genome. Genome Biol. 2009;10: R25. doi:10.1186/gb-2009-10-3-r25
-        link:  https://genomebiology.biomedcentral.com/articles/10.1186/gb-2009-10-3-r25
+  -
+    display-text: |
+      Langmead B, Salzberg SL. Fast gapped-read alignment with Bowtie 2. Nat Methods. 2012;9: 357–359. doi:10.1038/nmeth.1923
+    link: https://www.nature.com/articles/nmeth.1923
+  -
+    display-text: |
+      Langmead B, Trapnell C, Pop M, Salzberg SL. Ultrafast and memory-efficient alignment of short DNA sequences to the human genome. Genome Biol. 2009;10: R25. doi:10.1186/gb-2009-10-3-r25
+    link: https://genomebiology.biomedcentral.com/articles/10.1186/gb-2009-10-3-r25

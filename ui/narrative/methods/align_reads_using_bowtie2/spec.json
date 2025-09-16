@@ -1,311 +1,240 @@
 {
-  "ver" : "1.0.0",
-  "authors" : [ ],
-  "contact" : "help@kbase.us",
-  "visible" : true,
-  "categories" : ["active","expression","sequence"],
-  "widgets" : {
-    "input" : null,
-    "output" : "no-display"
+  "ver": "1.0.0",
+  "authors": [],
+  "contact": "help@kbase.us",
+  "visible": true,
+  "categories": ["active", "expression", "sequence"],
+  "widgets": {
+    "input": null,
+    "output": "no-display"
   },
-   "parameters" : [ {
-    "id" : "input_ref",
-    "optional" : false,
-    "advanced" : false,
-    "allow_multiple" : false,
-    "default_values" : [ "" ],
-    "field_type" : "text",
-    "text_options" : {
-      "valid_ws_types" : ["KBaseSets.ReadsSet", "KBaseRNASeq.RNASeqSampleSet" , "KBaseAssembly.SingleEndLibrary", "KBaseAssembly.PairedEndLibrary", "KBaseFile.SingleEndLibrary", "KBaseFile.PairedEndLibrary"]
+  "parameters": [
+    {
+      "id": "input_ref",
+      "optional": false,
+      "advanced": false,
+      "allow_multiple": false,
+      "default_values": [""],
+      "field_type": "text",
+      "text_options": {
+        "valid_ws_types": [
+          "KBaseSets.ReadsSet",
+          "KBaseRNASeq.RNASeqSampleSet",
+          "KBaseAssembly.SingleEndLibrary",
+          "KBaseAssembly.PairedEndLibrary",
+          "KBaseFile.SingleEndLibrary",
+          "KBaseFile.PairedEndLibrary"
+        ]
+      }
+    },
+    {
+      "id": "assembly_or_genome_ref",
+      "optional": false,
+      "advanced": false,
+      "allow_multiple": false,
+      "default_values": [""],
+      "field_type": "text",
+      "text_options": {
+        "valid_ws_types": [
+          "KBaseGenomes.Genome",
+          "KBaseGenomeAnnotations.Assembly",
+          "KBaseGenomes.ContigSet"
+        ]
+      }
+    },
+    {
+      "id": "output_obj_name_suffix",
+      "optional": false,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["_alignment_set"],
+      "field_type": "text",
+      "text_options": {
+        "valid_ws_types": [],
+        "is_output_name": true
+      }
+    },
+    {
+      "id": "quality_score",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["phred33"],
+      "field_type": "dropdown",
+      "dropdown_options": {
+        "options": [
+          { "value": "phred33", "display": "phred33", "id": "phred33", "ui_name": "phred33" },
+          { "value": "phred64", "display": "phred64", "id": "phred64", "ui_name": "phred64" }
+        ]
+      }
+    },
+    {
+      "id": "alignment_type",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["end-to-end"],
+      "field_type": "dropdown",
+      "dropdown_options": {
+        "options": [
+          { "value": "end-to-end", "display": "end-to-end", "id": "end-to-end", "ui_name": "end-to-end" },
+          { "value": "local", "display": "local", "id": "local", "ui_name": "local" }
+        ]
+      }
+    },
+    {
+      "id": "trim5",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["0"],
+      "field_type": "text",
+      "text_options": { "validate_as": "int" }
+    },
+    {
+      "id": "trim3",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["0"],
+      "field_type": "text",
+      "text_options": { "validate_as": "int" }
+    },
+    {
+      "id": "np",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["1"],
+      "field_type": "text",
+      "text_options": { "validate_as": "int" }
+    },
+    {
+      "id": "preset_options",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": [""],
+      "field_type": "dropdown",
+      "dropdown_options": {
+        "options": [
+          { "value": "sensitive", "display": "sensitive", "id": "sensitive", "ui_name": "sensitive" },
+          { "value": "very-sensitive", "display": "very-sensitive", "id": "very-sensitive", "ui_name": "very-sensitive" },
+          { "value": "fast", "display": "fast", "id": "fast", "ui_name": "fast" },
+          { "value": "very-fast", "display": "very-fast", "id": "very-fast", "ui_name": "very-fast" }
+        ]
+      }
+    },
+    {
+      "id": "minins",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["0"],
+      "field_type": "text",
+      "text_options": { "validate_as": "int" }
+    },
+    {
+      "id": "maxins",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["500"],
+      "field_type": "text",
+      "text_options": { "validate_as": "int" }
+    },
+    {
+      "id": "orientation",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": [""],
+      "field_type": "dropdown",
+      "dropdown_options": {
+        "options": [
+          { "value": "fr", "display": "fr", "id": "fr", "ui_name": "fr" },
+          { "value": "rf", "display": "rf", "id": "rf", "ui_name": "rf" },
+          { "value": "ff", "display": "ff", "id": "ff", "ui_name": "ff" }
+        ]
+      }
+    },
+    {
+      "id": "condition_label",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["unknown"],
+      "field_type": "text",
+      "text_options": {}
+    },
+    {
+      "id": "output_alignment_suffix",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["_alignment"],
+      "field_type": "text",
+      "text_options": { "is_output_name": true }
+    },
+
+    /* -------- NEW (Bowtie2 ≥2.5) -------- */
+
+    {
+      "id": "sam_opt_config",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": [""],
+      "field_type": "text",
+      "text_options": {}
+    },
+    {
+      "id": "use_sais",
+      "optional": true,
+      "advanced": true,
+      "allow_multiple": false,
+      "default_values": ["0"],
+      "field_type": "checkbox",
+      "checkbox_options": {
+        "checked_value": 1,
+        "unchecked_value": 0,
+        "default_value": 0
+      }
     }
-  }, {
-    "id" : "assembly_or_genome_ref",
-    "optional" : false,
-    "advanced" : false,
-    "allow_multiple" : false,
-    "default_values" : [ "" ],
-    "field_type" : "text",
-    "text_options" : {
-      "valid_ws_types" : ["KBaseGenomes.Genome", "KBaseGenomeAnnotations.Assembly", "KBaseGenomes.ContigSet" ]
-    }
-  }, {
-    "id" : "output_obj_name_suffix",
-    "optional" : false,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "_alignment_set" ],
-    "field_type" : "text",
-    "text_options" : {
-      "valid_ws_types" : [ ],
-      "is_output_name" : true
-    }
-  }, {
-    "id" : "quality_score",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "phred33" ],
-    "field_type" : "dropdown",
-    "dropdown_options":{
-      "options": [
-        {
-          "value": "phred33",
-          "display": "phred33",
-          "id": "phred33",
-          "ui_name": "phred33"
-        },
-        {
-          "value": "phred64",
-          "display": "phred64",
-          "id": "phred64",
-          "ui_name": "phred64"
-        }
-      ]
-    }
-  }, {
-    "id" : "alignment_type",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "end-to-end" ],
-    "field_type" : "dropdown",
-    "dropdown_options":{
-      "options": [
-        {
-          "value": "end-to-end",
-          "display": "end-to-end",
-          "id": "end-to-end",
-          "ui_name": "end-to-end"
-        },
-        {
-          "value": "local",
-          "display": "local",
-          "id": "local",
-          "ui_name": "local"
-        }
-      ]
-    }
-  }, {
-    "id" : "trim5",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "0" ],
-    "field_type" : "text",
-    "text_options" : {
-     "validate_as": "int"
-    }
-  }, {
-    "id" : "trim3",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "0" ],
-    "field_type" : "text",
-    "text_options" : {
-     "validate_as": "int"
-    }
-  }, {
-    "id" : "np",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "1" ],
-    "field_type" : "text",
-    "text_options" : {
-     "validate_as": "int"
-    }
-  }, {
-    "id" : "preset_options",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "" ],
-    "field_type" : "dropdown",
-    "dropdown_options":{
-      "options": [
-        {
-          "value": "sensitive",
-          "display": "sensitive",
-          "id": "sensitive",
-          "ui_name": "sensitive"
-        },
-        {
-          "value": "very-sensitive",
-          "display": "very-sensitive",
-          "id": "very-sensitive",
-          "ui_name": "very-sensitive"
-        },
-        {
-          "value": "fast",
-          "display": "fast",
-          "id": "fast",
-          "ui_name": "fast"
-        },
-        {
-          "value": "very-fast",
-          "display": "very-fast",
-          "id": "very-fast",
-          "ui_name": "very-fast"
-        }
-      ]
-    }
-  }, {
-    "id" : "minins",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "0" ],
-    "field_type" : "text",
-    "text_options" : {
-     "validate_as": "int"
-    }
-  }, {
-    "id" : "maxins",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "500" ],
-    "field_type" : "text",
-    "text_options" : {
-     "validate_as": "int"
-    }
-  }, {
-    "id" : "orientation",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "" ],
-    "field_type" : "dropdown",
-    "dropdown_options":{
-      "options": [
-        {
-          "value": "fr",
-          "display": "fr",
-          "id": "fr",
-          "ui_name": "fr"
-        },
-        {
-          "value": "rf",
-          "display": "rf",
-          "id": "rf",
-          "ui_name": "rf"
-        },
-        {
-          "value": "ff",
-          "display": "ff",
-          "id": "ff",
-          "ui_name": "ff"
-        }
-      ]
-    }
-  }, {
-    "id" : "condition_label",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "unknown" ],
-    "field_type" : "text",
-    "text_options" : { }
-  }, {
-    "id" : "output_alignment_suffix",
-    "optional" : true,
-    "advanced" : true,
-    "allow_multiple" : false,
-    "default_values" : [ "_alignment" ],
-    "field_type" : "text",
-    "text_options" : { 
-      "is_output_name" : true
-    }
-  } ],
-  "behavior" : {
-    "service-mapping" : {
-      "url" : "",
-      "name" : "kb_Bowtie2",
-      "method" : "align_reads_to_assembly_app",
-      "input_mapping" : [
-        {
-          "narrative_system_variable": "workspace",
-          "target_property" : "output_workspace"
-        },
-        {
-          "input_parameter" : "input_ref",
-          "target_property" : "input_ref",
-          "target_type_transform": "resolved-ref"
-        },
-        {
-          "input_parameter" : "assembly_or_genome_ref",
-          "target_property" : "assembly_or_genome_ref",
-          "target_type_transform": "resolved-ref"
-        },
-        {
-          "input_parameter" : "output_obj_name_suffix",
-          "target_property" : "output_obj_name_suffix"
-        },
-        {
-          "input_parameter" : "quality_score",
-          "target_property" : "quality_score"
-        },
-        {
-          "input_parameter" : "alignment_type",
-          "target_property" : "alignment_type"
-        },
-        {
-          "input_parameter" : "trim5",
-          "target_property" : "trim5"
-        },
-        {
-          "input_parameter" : "trim3",
-          "target_property" : "trim3"
-        },
-        {
-          "input_parameter" : "np",
-          "target_property" : "np"
-        },
-        {
-          "input_parameter" : "preset_options",
-          "target_property" : "preset_options"
-        },
-        {
-          "input_parameter" : "minins",
-          "target_property" : "minins"
-        },
-        {
-          "input_parameter" : "maxins",
-          "target_property" : "maxins"
-        },
-        {
-          "input_parameter" : "orientation",
-          "target_property" : "orientation"
-        },
-        {
-          "input_parameter" : "condition_label",
-          "target_property" : "condition_label"
-        },
-        {
-          "input_parameter" : "output_alignment_suffix",
-          "target_property" : "output_alignment_suffix"
-        }
+  ],
+  "behavior": {
+    "service-mapping": {
+      "url": "",
+      "name": "kb_Bowtie2",
+      "method": "align_reads_to_assembly_app",
+      "input_mapping": [
+        { "narrative_system_variable": "workspace", "target_property": "output_workspace" },
+        { "input_parameter": "input_ref", "target_property": "input_ref", "target_type_transform": "resolved-ref" },
+        { "input_parameter": "assembly_or_genome_ref", "target_property": "assembly_or_genome_ref", "target_type_transform": "resolved-ref" },
+        { "input_parameter": "output_obj_name_suffix", "target_property": "output_obj_name_suffix" },
+        { "input_parameter": "quality_score", "target_property": "quality_score" },
+        { "input_parameter": "alignment_type", "target_property": "alignment_type" },
+        { "input_parameter": "trim5", "target_property": "trim5" },
+        { "input_parameter": "trim3", "target_property": "trim3" },
+        { "input_parameter": "np", "target_property": "np" },
+        { "input_parameter": "preset_options", "target_property": "preset_options" },
+        { "input_parameter": "minins", "target_property": "minins" },
+        { "input_parameter": "maxins", "target_property": "maxins" },
+        { "input_parameter": "orientation", "target_property": "orientation" },
+        { "input_parameter": "condition_label", "target_property": "condition_label" },
+        { "input_parameter": "output_alignment_suffix", "target_property": "output_alignment_suffix" },
+
+        /* -------- NEW (Bowtie2 ≥2.5) -------- */
+        { "input_parameter": "sam_opt_config", "target_property": "sam_opt_config" },
+        { "input_parameter": "use_sais", "target_property": "use_sais" }
       ],
-      "output_mapping" : [
-        {
-          "narrative_system_variable": "workspace",
-          "target_property" : "workspace"
-        },
-        {
-          "narrative_system_variable": "workspace",
-          "target_property": "workspace_name"
-        },
-        {
-          "service_method_output_path": [0, "report_info", "report_name"],
-          "target_property": "report_name"
-        },
-        {
-          "service_method_output_path": [0, "report_info", "report_ref"],
-          "target_property": "report_ref"
-        }
-     ]
+      "output_mapping": [
+        { "narrative_system_variable": "workspace", "target_property": "workspace" },
+        { "narrative_system_variable": "workspace", "target_property": "workspace_name" },
+        { "service_method_output_path": [0, "report_info", "report_name"], "target_property": "report_name" },
+        { "service_method_output_path": [0, "report_info", "report_ref"], "target_property": "report_ref" }
+      ]
     }
   },
-  "job_id_output_field" : "docker"
+  "job_id_output_field": "docker"
 }

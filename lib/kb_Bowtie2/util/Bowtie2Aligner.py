@@ -73,16 +73,19 @@ class Bowtie2Aligner(object):
                 if 'output_alignment_suffix' in validated_params:
                     suffix = validated_params['output_alignment_suffix']
                 validated_params['output_alignment_name'] = input_info['info'][1] + suffix
-            single_lib_result = self.single_reads_lib_run(input_info,
-                                                          assembly_or_genome_ref,
-                                                          validated_params,
-                                                          create_report=validated_params['create_report'])
+            single_lib_result = self.single_reads_lib_run(
+                input_info,
+                assembly_or_genome_ref,
+                validated_params,
+                create_report=validated_params['create_report']
+            )
 
             return single_lib_result
 
         if input_info['run_mode'] == 'sample_set':
             reads = self.fetch_reads_refs_from_sampleset(input_info['ref'], input_info['info'], validated_params)
-            self.build_bowtie2_index(assembly_or_genome_ref, validated_params['output_workspace'])
+            # pass use_sais through so the index builder can add --sais if requested
+            self.build_bowtie2_index(assembly_or_genome_ref, validated_params['output_workspace'], validated_params)
 
             print('Running on set of reads=')
             pprint(reads)
@@ -106,7 +109,6 @@ class Bowtie2Aligner(object):
 
         raise ('Improper run mode')
 
-
     def build_single_execution_task(self, reads_lib_ref, params, output_name, condition):
         task_params = copy.deepcopy(params)
 
@@ -120,15 +122,16 @@ class Bowtie2Aligner(object):
                 'version': self.my_version,
                 'parameters': task_params}
 
-
-
     def single_reads_lib_run(self, read_lib_info, assembly_or_genome_ref, validated_params,
                              create_report=False, bowtie2_index_info=None):
         ''' run on one reads '''
 
         # download reads and prepare any bowtie2 index files
-        input_configuration = self.prepare_single_run(read_lib_info, assembly_or_genome_ref,
-                                                      bowtie2_index_info, validated_params['output_workspace'])
+        input_configuration = self.prepare_single_run(
+            read_lib_info, assembly_or_genome_ref,
+            bowtie2_index_info, validated_params['output_workspace'],
+            validated_params
+        )
 
         # run the actual program
         run_output_info = self.run_bowtie2_align_cli(input_configuration, validated_params)
@@ -145,18 +148,21 @@ class Bowtie2Aligner(object):
 
         return {'output_info': run_output_info, 'report_info': report_info}
 
-
-    def build_bowtie2_index(self, assembly_or_genome_ref, ws_for_cache):
+    def build_bowtie2_index(self, assembly_or_genome_ref, ws_for_cache, validated_params=None):
         bowtie2IndexBuilder = Bowtie2IndexBuilder(self.scratch_dir, self.workspace_url,
                                                   self.callback_url, self.srv_wiz_url,
                                                   self.provenance)
 
-        return bowtie2IndexBuilder.get_index({'ref': assembly_or_genome_ref,
-                                              'ws_for_cache': ws_for_cache})
+        index_params = {'ref': assembly_or_genome_ref,
+                        'ws_for_cache': ws_for_cache}
+        # propagate SAIS preference if present
+        if validated_params and 'use_sais' in validated_params:
+            index_params['use_sais'] = validated_params['use_sais']
 
+        return bowtie2IndexBuilder.get_index(index_params)
 
     def prepare_single_run(self, input_info, assembly_or_genome_ref,
-                           bowtie2_index_info, ws_for_cache):
+                           bowtie2_index_info, ws_for_cache, validated_params):
         ''' Given a reads ref and an assembly, setup the bowtie2 index '''
         # first setup the bowtie2 index of the assembly
         input_configuration = {'bowtie2_index_info': bowtie2_index_info}
@@ -165,8 +171,13 @@ class Bowtie2Aligner(object):
                                                       self.callback_url, self.srv_wiz_url,
                                                       self.provenance)
 
-            index_result = bowtie2IndexBuilder.get_index({'ref': assembly_or_genome_ref,
-                                                          'ws_for_cache': ws_for_cache})
+            index_params = {'ref': assembly_or_genome_ref,
+                            'ws_for_cache': ws_for_cache}
+            # propagate SAIS preference if present
+            if 'use_sais' in validated_params:
+                index_params['use_sais'] = validated_params['use_sais']
+
+            index_result = bowtie2IndexBuilder.get_index(index_params)
             input_configuration['bowtie2_index_info'] = index_result
 
         # next download the reads
@@ -183,7 +194,6 @@ class Bowtie2Aligner(object):
         input_configuration['reads_lib_ref'] = read_lib_ref
 
         return input_configuration
-
 
     def run_bowtie2_align_cli(self, input_configuration, validated_params):
         # pprint('======== input_configuration =====')
@@ -214,17 +224,19 @@ class Bowtie2Aligner(object):
         run_output_info['output_dir'] = output_dir
 
         # parse all the other parameters
-        if 'quality_score' in validated_params:
-            options.append('--' + str(validated_params['quality_score']))
+        if 'quality_score' in validated_params and str(validated_params['quality_score']).strip():
+            options.append('--' + str(validated_params['quality_score']).strip())
 
-        if 'alignment_type' in validated_params:
-            options.append('--' + str(validated_params['alignment_type']))
+        if 'alignment_type' in validated_params and str(validated_params['alignment_type']).strip():
+            options.append('--' + str(validated_params['alignment_type']).strip())
 
         if 'preset_options' in validated_params:
-            if 'alignment_type' in validated_params and validated_params['alignment_type'] == 'local':
-                options.append('--' + str(validated_params['preset_options'] + '-local'))
-            else:
-                options.append('--' + str(validated_params['preset_options']))
+            preset = str(validated_params['preset_options']).strip()
+            if preset:
+                if 'alignment_type' in validated_params and validated_params['alignment_type'] == 'local':
+                    options.append('--' + preset + '-local')
+                else:
+                    options.append('--' + preset)
 
         if 'trim5' in validated_params:
             options.extend(['--trim5', str(validated_params['trim5'])])
@@ -238,6 +250,12 @@ class Bowtie2Aligner(object):
         if 'maxins' in validated_params:
             options.extend(['--maxins', str(validated_params['maxins'])])
 
+        # NEW: pass-through for Bowtie2 >= 2.5 sam-opt-config
+        if 'sam_opt_config' in validated_params:
+            sam_cfg = str(validated_params['sam_opt_config']).strip()
+            if sam_cfg:
+                options.extend(['--sam-opt-config', sam_cfg])
+
         options.extend(['-a'])  # report all distinct reads
 
         # unfortunately, bowtie2 expects the index files to be in the current directory, and
@@ -246,7 +264,6 @@ class Bowtie2Aligner(object):
         self.bowtie2.run('bowtie2', options, cwd=bt2_index_dir)
 
         return run_output_info
-
 
     def save_read_alignment_output(self, run_output_info, input_configuration, validated_params):
         rau = ReadsAlignmentUtils(self.callback_url)
@@ -261,7 +278,6 @@ class Bowtie2Aligner(object):
                          'condition': condition}
         upload_results = rau.upload_alignment(upload_params)
         return upload_results
-
 
     def clean(self, run_output_info):
         ''' Not really necessary on a single run, but if we are running multiple local subjobs, we
@@ -366,7 +382,6 @@ class Bowtie2Aligner(object):
 
         return result
 
-
     def validate_params(self, params):
         validated_params = {}
 
@@ -378,11 +393,19 @@ class Bowtie2Aligner(object):
             else:
                 raise ValueError('"' + field + '" field required to run bowtie2 aligner app')
 
-        optional_fields = ['quality_score', 'alignment_type', 'preset_options', 'trim5', 'trim3', 'condition_label',
-                           'np', 'minins', 'maxins', 'output_alignment_suffix', 'output_alignment_name']
+        optional_fields = [
+            'quality_score', 'alignment_type', 'preset_options', 'trim5', 'trim3', 'condition_label',
+            'np', 'minins', 'maxins', 'output_alignment_suffix', 'output_alignment_name',
+            # NEW:
+            'sam_opt_config', 'use_sais'
+        ]
         for field in optional_fields:
             if field in params:
                 if params[field] is not None:
+                    # For strings, avoid passing empty values where they produce bad flags
+                    if isinstance(params[field], str) and not params[field].strip():
+                        if field in ('preset_options', 'sam_opt_config'):
+                            continue
                     validated_params[field] = params[field]
 
         validated_params['create_report'] = True
@@ -404,22 +427,10 @@ class Bowtie2Aligner(object):
 
         return validated_params
 
-
     def fetch_reads_refs_from_sampleset(self, ref, info, validated_params):
         """
         Note: adapted from kbaseapps/kb_hisat2 - file_util.py
-
-        From the given object ref, return a list of all reads objects that are a part of that
-        object. E.g., if ref is a ReadsSet, return a list of all PairedEndLibrary or SingleEndLibrary
-        refs that are a member of that ReadsSet. This is returned as a list of dictionaries as follows:
-        {
-            "ref": reads object reference,
-            "condition": condition string associated with that reads object
-        }
-        The only one required is "ref", all other keys may or may not be present, based on the reads
-        object or object type in initial ref variable. E.g. a RNASeqSampleSet might have condition info
-        for each reads object, but a single PairedEndLibrary may not have that info.
-        If ref is already a Reads library, just returns a list with ref as a single element.
+        ...
         """
         obj_type = self.get_type_from_obj_info(info)
         refs = list()
@@ -478,7 +489,6 @@ class Bowtie2Aligner(object):
             return {'run_mode': 'sample_set', 'info': info, 'ref': validated_params['input_ref']}
 
         raise ValueError('Object type of input_ref is not valid, was: ' + str(obj_type))
-
 
     def get_type_from_obj_info(self, info):
         return info[2].split('-')[0]

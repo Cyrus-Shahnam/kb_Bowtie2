@@ -28,6 +28,76 @@ class kb_Bowtie2:
     GIT_COMMIT_HASH = "fc2f147ea45b59fa54ab2663b06b40043613ffc5"
 
     #BEGIN_CLASS_HEADER
+    @staticmethod
+    def _truthy(val):
+        """Return True if val represents an enabled checkbox/bool-like value."""
+        if isinstance(val, bool):
+            return val
+        if isinstance(val, (int, float)):
+            return val != 0
+        if isinstance(val, str):
+            return val.strip().lower() in ("1", "true", "t", "yes", "y", "on")
+        return False
+
+    @staticmethod
+    def _as_int_or_none(val):
+        if val is None:
+            return None
+        try:
+            return int(val)
+        except Exception:
+            return None
+
+    @classmethod
+    def _normalize_params(cls, params, for_index=False):
+        """
+        Lightly sanitize/normalize user params so downstream util classes
+        can consume consistent types/keys.
+        - Drops empty sam_opt_config so older code won't emit an empty flag.
+        - Normalizes use_sais to a canonical boolean (and also 0/1 int for convenience).
+        - Best-effort int coercion for numeric text fields.
+        """
+        if not isinstance(params, dict):
+            return params
+
+        p = dict(params)  # shallow copy
+
+        # --- Bowtie2 ≥2.5 advanced flags ---
+        # Keep only non-empty sam_opt_config
+        sam_cfg = p.get("sam_opt_config")
+        if isinstance(sam_cfg, str):
+            sam_cfg = sam_cfg.strip()
+        if sam_cfg:
+            p["sam_opt_config"] = sam_cfg
+        else:
+            p.pop("sam_opt_config", None)
+
+        # Normalize use_sais (used by index builder)
+        if "use_sais" in p:
+            enabled = cls._truthy(p.get("use_sais"))
+            p["use_sais"] = enabled
+            # some downstream code prefers 0/1; provide both
+            p["use_sais_int"] = 1 if enabled else 0
+
+        # Coerce common numeric text fields to ints when possible (harmless if unused)
+        for k in ("trim5", "trim3", "np", "minins", "maxins"):
+            if k in p:
+                iv = cls._as_int_or_none(p.get(k))
+                if iv is not None:
+                    p[k] = iv
+
+        # Alignment type / quality score: strip whitespace for safety
+        for k in ("alignment_type", "quality_score", "preset_options", "orientation", "condition_label"):
+            if k in p and isinstance(p[k], str):
+                p[k] = p[k].strip()
+
+        # Optionally mark this call's intent
+        if for_index:
+            p["_intent"] = "build_index"
+        else:
+            p["_intent"] = "align"
+
+        return p
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -44,47 +114,35 @@ class kb_Bowtie2:
 
     def align_reads_to_assembly_app(self, ctx, params):
         """
-        :param params: instance of type "AlignReadsParams" (Will align the
-           input reads (or set of reads specified in a SampleSet) to the
-           specified assembly or assembly for the specified Genome (accepts
-           Assembly, ContigSet, or Genome types) and produces a
-           ReadsAlignment object, or in the case of a SampleSet, a
-           ReadsAlignmentSet object. required: input_ref - ref to either a
-           SingleEnd/PairedEnd reads, or a SampleSet input (eventually should
-           support a ReadsSet as well) assembly_or_genome - ref to Assembly,
-           ContigSet, or Genome output_name - name of the output
-           ReadsAlignment or ReadsAlignmentSet output_workspace - name or id
-           of the WS to save the results to optional: ...) -> structure:
-           parameter "input_ref" of String, parameter
-           "assembly_or_genome_ref" of String, parameter "output_name" of
-           String, parameter "output_workspace" of String, parameter
-           "output_alignment_filename_extension" of String, parameter
-           "phred33" of String, parameter "phred64" of String, parameter
-           "local" of String, parameter "very-fast" of String, parameter
-           "fast" of String, parameter "very-sensitive" of String, parameter
-           "sensitive" of String, parameter "very-fast-local" of String,
-           parameter "very-sensitive-local" of String, parameter "fast-local"
-           of String, parameter "fast-sensitive" of String, parameter
-           "quality_score" of String, parameter "alignment_type" of String,
-           parameter "trim5" of Long, parameter "trim3" of Long, parameter
-           "np" of Long, parameter "preset_options" of String, parameter
-           "minins" of Long, parameter "maxins" of Long, parameter
-           "orientation" of String, parameter "concurrent_njsw_tasks" of
-           Long, parameter "concurrent_local_tasks" of Long
-        :returns: instance of type "AlignReadsResult" -> structure: parameter
-           "reads_alignment_ref" of String, parameter
-           "read_alignment_set_ref" of String, parameter "report_name" of
-           String, parameter "report_ref" of String
+        :param params: instance of type "AlignReadsParams" ...
+        :returns: instance of type "AlignReadsResult" ...
         """
         # ctx is the context object
         # return variables are: result
         #BEGIN align_reads_to_assembly_app
-        print('Running align_reads_to_assembly_app() with params=')
+        print('Running align_reads_to_assembly_app() with raw params=')
         pprint(params)
+
+        # Normalize & pass through the new advanced flags
+        nparams = self._normalize_params(params, for_index=False)
+
+        # Log the normalized subset of interest for debug
+        debug_view = {
+            k: nparams.get(k)
+            for k in (
+                "alignment_type", "quality_score", "preset_options", "trim5", "trim3",
+                "np", "minins", "maxins", "orientation",
+                # new:
+                "sam_opt_config"
+            )
+        }
+        print('Normalized params for align (subset):')
+        pprint(debug_view)
+
         bowtie2_aligner = Bowtie2Aligner(self.scratch_dir, self.workspace_url,
                                          self.callback_url, self.srv_wiz_url,
                                          ctx.provenance())
-        result = bowtie2_aligner.align(params)
+        result = bowtie2_aligner.align(nparams)
         #END align_reads_to_assembly_app
 
         # At some point might do deeper type checking...
@@ -105,40 +163,25 @@ class kb_Bowtie2:
 
     def get_bowtie2_index(self, ctx, params):
         """
-        :param params: instance of type "GetBowtie2Index" (Provide a
-           reference to either an Assembly or Genome to get a Bowtie2 index.
-           output_dir is optional, if provided the index files will be saved
-           in that directory.  If not, a directory will be generated for you
-           and returned by this function.  If specifying the output_dir, the
-           directory must not exist yet (to ensure only the index files are
-           added there). Currently, Bowtie2 indexes are cached to a WS
-           object.  If that object does not exist, then calling this function
-           can create a new object.  To create the cache, you must specify
-           the ws name or ID in 'ws_for_cache' in which to create the cached
-           index.  If this field is not set, the result will not be cached.
-           This parameter will eventually be deprecated once the big file
-           cache service is implemented.) -> structure: parameter "ref" of
-           String, parameter "output_dir" of String, parameter "ws_for_cache"
-           of String
-        :returns: instance of type "GetBowtie2IndexResult" (output_dir - the
-           folder containing the index files from_cache - 0 if the index was
-           built fresh, 1 if it was found in the cache pushed_to_cache - if
-           the index was rebuilt and successfully added to the cache, this
-           will be set to 1; otherwise set to 0) -> structure: parameter
-           "output_dir" of String, parameter "from_cache" of type "boolean"
-           (A boolean - 0 for false, 1 for true. @range (0, 1)), parameter
-           "pushed_to_cache" of type "boolean" (A boolean - 0 for false, 1
-           for true. @range (0, 1))
+        :param params: instance of type "GetBowtie2Index" ...
+        :returns: instance of type "GetBowtie2IndexResult" ...
         """
         # ctx is the context object
         # return variables are: result
         #BEGIN get_bowtie2_index
-        print('Running get_bowtie2_index() with params=')
+        print('Running get_bowtie2_index() with raw params=')
         pprint(params)
+
+        nparams = self._normalize_params(params, for_index=True)
+
+        # Show whether SAIS is enabled after normalization
+        print('Index build flags (subset): {"use_sais": %s, "use_sais_int": %s}' %
+              (nparams.get("use_sais"), nparams.get("use_sais_int")))
+
         bowtie2IndexBuilder = Bowtie2IndexBuilder(self.scratch_dir, self.workspace_url,
                                                   self.callback_url, self.srv_wiz_url,
                                                   ctx.provenance())
-        result = bowtie2IndexBuilder.get_index(params)
+        result = bowtie2IndexBuilder.get_index(nparams)
         #END get_bowtie2_index
 
         # At some point might do deeper type checking...
@@ -151,27 +194,27 @@ class kb_Bowtie2:
     def run_bowtie2_cli(self, ctx, params):
         """
         general purpose local function for running tools in the bowtie2 suite
-        :param params: instance of type "RunBowtie2CLIParams" (supported
-           commands: bowtie2 bowtie2-align-l bowtie2-align-s bowtie2-build
-           bowtie2-build-l bowtie2-build-s bowtie2-inspect bowtie2-inspect-l
-           bowtie2-inspect-s) -> structure: parameter "command_name" of
-           String, parameter "options" of list of String
+        :param params: instance of type "RunBowtie2CLIParams" ...
         """
         # ctx is the context object
         #BEGIN run_bowtie2_cli
         print('Running run_bowtie2_cli() with params=')
         pprint(params)
 
-        if 'command' not in params:
-            raise ValueError('required parameter field "command" was missing.')
-        if 'options' not in params:
+        # accept either 'command' or 'command_name'
+        command = params.get('command', params.get('command_name'))
+        options = params.get('options')
+
+        if not command:
+            raise ValueError('required parameter "command" (or "command_name") was missing.')
+        if options is None:
             raise ValueError('required parameter field "options" was missing.')
 
         bowtie2 = Bowtie2Runner(self.scratch_dir)
-        bowtie2.run(params['command'], params['options'])
-
+        bowtie2.run(command, options)
         #END run_bowtie2_cli
         pass
+
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",
